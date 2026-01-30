@@ -65,7 +65,7 @@ export const TileInput = ({ value, onChange }: TileInputProps) => {
         {[0, 1, 2, 3, 4].map((index) => (
           <input
             key={index}
-            ref={(el) => (inputRefs.current[index] = el)}
+            ref={(el) => { inputRefs.current[index] = el; }}
             type="text"
             className={`tile ${tiles[index] ? 'filled' : ''}`}
             value={tiles[index] || ''}
