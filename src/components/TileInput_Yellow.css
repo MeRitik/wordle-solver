@@ -1,0 +1,13 @@
+.label-badge.yellow {
+    background: rgba(234, 179, 8, 0.2);
+    color: #eab308;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.tile.yellow-tile.filled {
+    background: #eab308;
+    border-color: #eab308;
+    font-size: 1.5rem;
+    /* Allow more text */
+    letter-spacing: -1px;
+}

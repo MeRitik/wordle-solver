@@ -9,7 +9,7 @@ import './App.css';
 
 function WordleSolver() {
   const [correctPositions, setCorrectPositions] = useState<string[]>(['', '', '', '', '']);
-  const [wrongPositions, setWrongPositions] = useState<string>('');
+  const [wrongPositions, setWrongPositions] = useState<string[]>(['', '', '', '', '']);
   const [absentLetters, setAbsentLetters] = useState<string>('');
   const [matchingWords, setMatchingWords] = useState<string[]>([]);
   const [allWords, setAllWords] = useState<string[]>([]);
@@ -27,16 +27,34 @@ function WordleSolver() {
       .catch(error => console.error('Error loading words:', error));
   }, []);
 
+  const handleAbsentChange = (raw: string) => {
+    const presentLetters = new Set(
+      (correctPositions.join('') + wrongPositions.join(''))
+        .toUpperCase()
+        .split('')
+        .filter(Boolean),
+    );
+
+    const filtered = raw
+      .toUpperCase()
+      .split('')
+      .filter((ch) => !presentLetters.has(ch))
+      .join('');
+
+    setAbsentLetters(filtered);
+  };
+
   // Find matching words
   useEffect(() => {
     if (allWords.length === 0) return;
 
     const pattern = correctPositions.map(letter => letter || '_').join('');
-    const wrong = wrongPositions.toLowerCase();
+    // Flatten all wrong position letters to check if any exist (so we can skip search if empty)
+    const hasWrong = wrongPositions.some(p => p.length > 0);
     const absent = absentLetters.toLowerCase();
 
     // Only search if we have at least one criteria
-    if (pattern === '_____' && !wrong && !absent) {
+    if (pattern === '_____' && !hasWrong && !absent) {
       setMatchingWords([]);
       return;
     }
@@ -50,11 +68,17 @@ function WordleSolver() {
         }
       }
 
-      // Check wrong positions (yellow) - must contain these letters but not in these positions
-      if (wrong) {
-        for (const letter of wrong) {
-          if (!word.includes(letter)) {
-            return false;
+      // Check wrong positions (yellow)
+      // For each index, any letter entered there CANNOT be at that index.
+      // (We intentionally do NOT require that these letters appear elsewhere
+      // in the word, per your requested behavior.)
+      for (let i = 0; i < 5; i++) {
+        const wrongChars = wrongPositions[i].toLowerCase();
+        if (wrongChars) {
+          for (const char of wrongChars) {
+            if (word[i] === char) {
+              return false;
+            }
           }
         }
       }
@@ -76,7 +100,7 @@ function WordleSolver() {
 
   const handleReset = () => {
     setCorrectPositions(['', '', '', '', '']);
-    setWrongPositions('');
+    setWrongPositions(['', '', '', '', '']);
     setAbsentLetters('');
     setMatchingWords([]);
   };
@@ -92,18 +116,18 @@ function WordleSolver() {
             onChange={setCorrectPositions}
           />
 
-          <LetterInput
-            label="Wrong Position Letters"
+          <TileInput
             value={wrongPositions}
             onChange={setWrongPositions}
-            helpText="Letters that exist but are in wrong positions"
-            type="yellow"
+            label="Wrong Position Letters"
+            badgeType="yellow"
+            maxLength={1}
           />
 
           <LetterInput
             label="Absent Letters"
             value={absentLetters}
-            onChange={setAbsentLetters}
+            onChange={handleAbsentChange}
             helpText="Letters that do not exist in the word"
             type="gray"
           />
@@ -124,7 +148,7 @@ function WordleSolver() {
           words={matchingWords}
           criteria={{
             correctPositions: correctPositions.filter(l => l).join('').toUpperCase(),
-            wrongPositions: wrongPositions.toUpperCase(),
+            wrongPositions: wrongPositions.join('').toUpperCase(), // Display flattened list for now
             absentLetters: absentLetters.toUpperCase(),
           }}
         />

@@ -1,12 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
 import './TileInput.css';
+import './TileInput_Yellow.css';
 
 interface TileInputProps {
   value: string[];
   onChange: (value: string[]) => void;
+  label?: string;
+  badgeType?: 'green' | 'yellow';
+  maxLength?: number;
 }
 
-export const TileInput = ({ value, onChange }: TileInputProps) => {
+export const TileInput = ({ 
+  value, 
+  onChange, 
+  label = "Correct Positions", 
+  badgeType = "green",
+  maxLength = 1 
+}: TileInputProps) => {
   const [tiles, setTiles] = useState<string[]>(value);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -15,14 +25,14 @@ export const TileInput = ({ value, onChange }: TileInputProps) => {
   }, [value]);
 
   const handleTileChange = (index: number, val: string) => {
-    const sanitized = val.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+    const sanitized = val.toUpperCase().replace(/[^A-Z]/g, '').slice(0, maxLength);
     const newTiles = [...tiles];
     newTiles[index] = sanitized;
     setTiles(newTiles);
     onChange(newTiles);
 
-    // Auto-focus next tile
-    if (sanitized && index < 4) {
+    // Auto-focus next tile only if full (and maxLength is 1)
+    if (maxLength === 1 && sanitized && index < 4) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -58,27 +68,35 @@ export const TileInput = ({ value, onChange }: TileInputProps) => {
   return (
     <div className="form-group">
       <label className="form-label">
-        Correct Positions
-        <span className="label-badge green">Green</span>
+        {label}
+        <span className={`label-badge ${badgeType}`}>
+          {badgeType === 'yellow' ? 'Yellow' : 'Green'}
+        </span>
       </label>
       <div className="tiles-container" onPaste={handlePaste}>
         {[0, 1, 2, 3, 4].map((index) => (
           <input
             key={index}
-            ref={(el) => { inputRefs.current[index] = el; }}
+            ref={(el) => {
+              inputRefs.current[index] = el;
+            }}
             type="text"
-            className={`tile ${tiles[index] ? 'filled' : ''}`}
+            className={`tile ${tiles[index] ? 'filled' : ''} ${badgeType === 'yellow' ? 'yellow-tile' : ''}`}
             value={tiles[index] || ''}
             onChange={(e) => handleTileChange(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
-            maxLength={1}
+            maxLength={maxLength}
             autoComplete="off"
             autoCapitalize="characters"
             aria-label={`Position ${index + 1}`}
           />
         ))}
       </div>
-      <p className="help-text">Enter known letters in their correct positions</p>
+      <p className="help-text">
+        {badgeType === 'yellow'
+          ? 'Letters that are in the word but not in these positions'
+          : 'Enter known letters in their correct positions'}
+      </p>
     </div>
   );
 };
