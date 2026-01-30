@@ -16,7 +16,7 @@ function WordleSolver() {
 
   // Load word list
   useEffect(() => {
-    fetch('/src/assets/words.txt')
+    fetch('/words.txt')
       .then(response => response.text())
       .then(text => {
         const words = text.split('\n')
