@@ -7,6 +7,7 @@ import { LetterInput } from './components/LetterInput';
 import { Results } from './components/Results';
 import { Game } from './components/Game';
 import { ThemeProvider } from './context/ThemeContext';
+import { GameProvider } from './context/GameContext';
 import './App.css';
 
 function WordleSolver() {
@@ -16,8 +17,27 @@ function WordleSolver() {
   const [matchingWords, setMatchingWords] = useState<string[]>([]);
   const [allWords, setAllWords] = useState<string[]>([]);
 
+  const SOLVER_STORAGE_KEY = 'wordle-buddy-solve-v1';
+
   // Load word list
   useEffect(() => {
+    try {
+      const raw = window.sessionStorage.getItem(SOLVER_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<{
+          correctPositions: string[];
+          wrongPositions: string[];
+          absentLetters: string;
+        }>;
+
+        if (parsed.correctPositions) setCorrectPositions(parsed.correctPositions);
+        if (parsed.wrongPositions) setWrongPositions(parsed.wrongPositions);
+        if (typeof parsed.absentLetters === 'string') setAbsentLetters(parsed.absentLetters);
+      }
+    } catch {
+      // ignore bad session data
+    }
+
     fetch('/words.txt')
       .then(response => response.text())
       .then(text => {
@@ -86,6 +106,23 @@ function WordleSolver() {
         }
       }
 
+      // Require that each "wrong position" letter appears somewhere in the word
+      const requiredLetters = Array.from(
+        new Set(
+          wrongPositions
+            .join('')
+            .toLowerCase()
+            .split('')
+            .filter(Boolean),
+        ),
+      );
+
+      for (const letter of requiredLetters) {
+        if (!word.includes(letter)) {
+          return false;
+        }
+      }
+
       // Check absent letters (gray) - must not contain these
       if (absent) {
         for (const letter of absent) {
@@ -107,6 +144,19 @@ function WordleSolver() {
     setAbsentLetters('');
     setMatchingWords([]);
   };
+
+  useEffect(() => {
+    try {
+      const payload = {
+        correctPositions,
+        wrongPositions,
+        absentLetters,
+      };
+      window.sessionStorage.setItem(SOLVER_STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      // ignore write errors
+    }
+  }, [correctPositions, wrongPositions, absentLetters]);
 
   return (
     <>
@@ -161,17 +211,19 @@ function WordleSolver() {
 function App() {
   return (
     <ThemeProvider>
-      <div className="app">
-        <div className="container">
-          <Header />
-          <Routes>
-            <Route path="/play" element={<Game />} />
-            <Route path="/solve" element={<WordleSolver />} />
-            <Route path="/" element={<Navigate to="/play" replace />} />
-            <Route path="*" element={<Navigate to="/play" replace />} />
-          </Routes>
+      <GameProvider>
+        <div className="app">
+          <div className="container">
+            <Header />
+            <Routes>
+              <Route path="/play" element={<Game />} />
+              <Route path="/solve" element={<WordleSolver />} />
+              <Route path="/" element={<Navigate to="/play" replace />} />
+              <Route path="*" element={<Navigate to="/play" replace />} />
+            </Routes>
+          </div>
         </div>
-      </div>
+      </GameProvider>
       <Analytics />
     </ThemeProvider>
   );

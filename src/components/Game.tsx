@@ -1,138 +1,28 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import './Game.css';
 import './TileInput.css';
-
-const WORD_LENGTH = 5;
-const MAX_GUESSES = 6;
-
-type TileStatus = 'correct' | 'present' | 'absent';
-
-type GameState = 'playing' | 'won' | 'lost';
+import { MAX_GUESSES, WORD_LENGTH, useGame } from '../context/GameContext';
+import type { TileStatus } from '../context/GameContext';
 
 export const Game = () => {
-  const [allWords, setAllWords] = useState<string[]>([]);
-  const [solution, setSolution] = useState<string | null>(null);
-  const [guesses, setGuesses] = useState<string[]>([]);
-  const [statuses, setStatuses] = useState<TileStatus[][]>([]);
-  const [currentGuess, setCurrentGuess] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
-  const [gameState, setGameState] = useState<GameState>('playing');
+  const {
+    allWords,
+    solution,
+    guesses,
+    statuses,
+    currentGuess,
+    message,
+    gameState,
+    handleLetterInput,
+    handleBackspace,
+    handleSubmitGuess,
+    startNewGame,
+  } = useGame();
   const sectionRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    fetch('/words.txt')
-      .then((response) => response.text())
-      .then((text) => {
-        const words = text
-          .split('\n')
-          .map((word) => word.trim().toLowerCase())
-          .filter((word) => word.length === WORD_LENGTH);
-
-        setAllWords(words);
-        if (words.length > 0) {
-          const random = words[Math.floor(Math.random() * words.length)];
-          setSolution(random);
-        }
-      })
-      .catch((error) => console.error('Error loading words:', error));
-  }, []);
 
   useEffect(() => {
     sectionRef.current?.focus();
   }, []);
-
-  const startNewGame = () => {
-    if (allWords.length === 0) return;
-
-    const random = allWords[Math.floor(Math.random() * allWords.length)];
-    setSolution(random);
-    setGuesses([]);
-    setStatuses([]);
-    setCurrentGuess('');
-    setMessage('');
-    setGameState('playing');
-  };
-
-  const computeStatuses = (guess: string, answer: string): TileStatus[] => {
-    const result: TileStatus[] = Array(WORD_LENGTH).fill('absent');
-    const answerChars = answer.split('');
-    const used = Array(WORD_LENGTH).fill(false);
-
-    // First pass: correct positions
-    for (let i = 0; i < WORD_LENGTH; i++) {
-      if (guess[i] === answer[i]) {
-        result[i] = 'correct';
-        used[i] = true;
-      }
-    }
-
-    // Second pass: present letters
-    for (let i = 0; i < WORD_LENGTH; i++) {
-      if (result[i] === 'correct') continue;
-      const char = guess[i];
-      const index = answerChars.findIndex((c, j) => !used[j] && c === char);
-      if (index !== -1) {
-        result[i] = 'present';
-        used[index] = true;
-      }
-    }
-
-    return result;
-  };
-
-  const handleLetterInput = (letter: string) => {
-    if (gameState !== 'playing') return;
-
-    setCurrentGuess((prev) => {
-      if (prev.length >= WORD_LENGTH) return prev;
-      return (prev + letter.toUpperCase()).slice(0, WORD_LENGTH);
-    });
-  };
-
-  const handleBackspace = () => {
-    if (gameState !== 'playing') return;
-    setCurrentGuess((prev) => prev.slice(0, -1));
-  };
-
-  const handleSubmitGuess = () => {
-    if (gameState !== 'playing') return;
-    if (!solution) return;
-
-    const guess = currentGuess.toLowerCase();
-
-    if (guess.length !== WORD_LENGTH) {
-      setMessage('Enter a 5-letter word.');
-      return;
-    }
-
-    if (!allWords.includes(guess)) {
-      setMessage('Not in word list.');
-      return;
-    }
-
-    const rowStatuses = computeStatuses(guess, solution);
-
-    const newGuesses = [...guesses, guess];
-    const newStatuses = [...statuses, rowStatuses];
-
-    setGuesses(newGuesses);
-    setStatuses(newStatuses);
-    setCurrentGuess('');
-
-    if (guess === solution) {
-      setGameState('won');
-      setMessage('Nice! You found the word.');
-      return;
-    }
-
-    if (newGuesses.length >= MAX_GUESSES) {
-      setGameState('lost');
-      setMessage(`The word was ${solution.toUpperCase()}.`);
-      return;
-    }
-
-    setMessage('');
-  };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const key = e.key;
 
