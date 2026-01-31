@@ -8,6 +8,7 @@ interface TileInputProps {
   label?: string;
   badgeType?: 'green' | 'yellow';
   maxLength?: number;
+  blockedLetters?: string;
 }
 
 export const TileInput = ({ 
@@ -15,7 +16,8 @@ export const TileInput = ({
   onChange, 
   label = "Correct Positions", 
   badgeType = "green",
-  maxLength = 1 
+  maxLength = 1,
+  blockedLetters,
 }: TileInputProps) => {
   const [tiles, setTiles] = useState<string[]>(value);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -25,7 +27,20 @@ export const TileInput = ({
   }, [value]);
 
   const handleTileChange = (index: number, val: string) => {
-    const sanitized = val.toUpperCase().replace(/[^A-Z]/g, '').slice(0, maxLength);
+    const blockedSet = new Set(
+      (blockedLetters || '')
+        .toUpperCase()
+        .split('')
+        .filter(Boolean)
+    );
+
+    const sanitized = val
+      .toUpperCase()
+      .replace(/[^A-Z]/g, '')
+      .split('')
+      .filter((ch) => !blockedSet.has(ch))
+      .join('')
+      .slice(0, maxLength);
     const newTiles = [...tiles];
     newTiles[index] = sanitized;
     setTiles(newTiles);
@@ -56,7 +71,19 @@ export const TileInput = ({
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text');
-    const letters = text.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5).split('');
+    const blockedSet = new Set(
+      (blockedLetters || '')
+        .toUpperCase()
+        .split('')
+        .filter(Boolean)
+    );
+
+    const letters = text
+      .toUpperCase()
+      .replace(/[^A-Z]/g, '')
+      .slice(0, 5)
+      .split('')
+      .filter((ch) => !blockedSet.has(ch));
     const newTiles = [...tiles];
     letters.forEach((letter, i) => {
       if (i < 5) newTiles[i] = letter;

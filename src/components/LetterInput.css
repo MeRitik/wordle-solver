@@ -16,6 +16,7 @@
     transition: all 0.2s ease;
     margin: 0 auto;
     display: block;
+    caret-color: transparent;
 }
 
 .letter-input::-webkit-input-placeholder {

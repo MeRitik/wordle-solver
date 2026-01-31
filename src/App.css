@@ -81,15 +81,16 @@
 
 @media (max-width: 480px) {
   .app {
-    padding: 0.5rem;
+    padding: 0.5rem 0;
   }
 
   .container {
-    padding: 1.5rem 1rem;
+    padding: 1rem 0;
+    border-radius: 0;
   }
 
   .form-section {
-    padding: 1.25rem;
+    padding: 1.25rem 0.75rem;
   }
 
   .btn {
@@ -99,16 +100,5 @@
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 1.5rem 1rem;
-  }
-
-  .form-section {
-    padding: 1.25rem;
-  }
-
-  .btn {
-    padding: 0.875rem 1.5rem;
-    font-size: 0.9rem;
-  }
+  /* duplicate block removed - settings kept in the block above */
 }

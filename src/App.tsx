@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from '@vercel/analytics/react';
 import { TileInput } from './components/TileInput';
 import { LetterInput } from './components/LetterInput';
 import { Results } from './components/Results';
+import { Game } from './components/Game';
 import { ThemeProvider } from './context/ThemeContext';
 import './App.css';
 
@@ -35,13 +37,14 @@ function WordleSolver() {
         .filter(Boolean),
     );
 
-    const filtered = raw
-      .toUpperCase()
-      .split('')
-      .filter((ch) => !presentLetters.has(ch))
-      .join('');
+    const filteredUnique = Array.from(new Set(
+      raw
+        .toUpperCase()
+        .split('')
+        .filter((ch) => !presentLetters.has(ch))
+    )).join('');
 
-    setAbsentLetters(filtered);
+    setAbsentLetters(filteredUnique);
   };
 
   // Find matching words
@@ -106,61 +109,69 @@ function WordleSolver() {
   };
 
   return (
-    <div className="app">
-      <div className="container">
-        <Header />
-
-        <div className="form-section">
-          <TileInput
-            value={correctPositions}
-            onChange={setCorrectPositions}
-          />
-
-          <TileInput
-            value={wrongPositions}
-            onChange={setWrongPositions}
-            label="Wrong Position Letters"
-            badgeType="yellow"
-            maxLength={1}
-          />
-
-          <LetterInput
-            label="Absent Letters"
-            value={absentLetters}
-            onChange={handleAbsentChange}
-            helpText="Letters that do not exist in the word"
-            type="gray"
-          />
-
-          <div className="button-group">
-            <button className="btn btn-reset" onClick={handleReset}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="1 4 1 10 7 10"></polyline>
-                <polyline points="23 20 23 14 17 14"></polyline>
-                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
-              </svg>
-              Clear All
-            </button>
-          </div>
-        </div>
-
-        <Results
-          words={matchingWords}
-          criteria={{
-            correctPositions: correctPositions.filter(l => l).join('').toUpperCase(),
-            wrongPositions: wrongPositions.join('').toUpperCase(), // Display flattened list for now
-            absentLetters: absentLetters.toUpperCase(),
-          }}
+    <>
+      <div className="form-section">
+        <TileInput
+          value={correctPositions}
+          onChange={setCorrectPositions}
+          blockedLetters={absentLetters}
         />
+
+        <TileInput
+          value={wrongPositions}
+          onChange={setWrongPositions}
+          label="Wrong Position Letters"
+          badgeType="yellow"
+          maxLength={1}
+          blockedLetters={absentLetters}
+        />
+
+        <LetterInput
+          label="Absent Letters"
+          value={absentLetters}
+          onChange={handleAbsentChange}
+          helpText="Letters that do not exist in the word"
+          type="gray"
+        />
+
+        <div className="button-group">
+          <button className="btn btn-reset" onClick={handleReset}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <polyline points="23 20 23 14 17 14"></polyline>
+              <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+            </svg>
+            Clear All
+          </button>
+        </div>
       </div>
-    </div>
+
+      <Results
+        words={matchingWords}
+        criteria={{
+          correctPositions: correctPositions.filter(l => l).join('').toUpperCase(),
+          wrongPositions: wrongPositions.join('').toUpperCase(), // Display flattened list for now
+          absentLetters: absentLetters.toUpperCase(),
+        }}
+      />
+    </>
   );
 }
 
 function App() {
   return (
     <ThemeProvider>
-      <WordleSolver />
+      <div className="app">
+        <div className="container">
+          <Header />
+          <Routes>
+            <Route path="/play" element={<Game />} />
+            <Route path="/solve" element={<WordleSolver />} />
+            <Route path="/" element={<Navigate to="/play" replace />} />
+            <Route path="*" element={<Navigate to="/play" replace />} />
+          </Routes>
+        </div>
+      </div>
       <Analytics />
     </ThemeProvider>
   );

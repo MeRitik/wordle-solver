@@ -1,0 +1,184 @@
+.game-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-section:focus {
+    outline: none;
+}
+
+.game-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.guess-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.game-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-tile.correct {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: #ffffff;
+}
+
+.game-tile.present {
+    background: #b59f3b;
+    border-color: #b59f3b;
+    color: #ffffff;
+}
+
+.game-tile.absent {
+    background: #3a3a3c;
+    border-color: #3a3a3c;
+    color: #ffffff;
+}
+
+.game-input-row {
+    display: none;
+}
+
+.game-message {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.game-message.final {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.game-footer {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.game-new {
+    padding-inline: 1.75rem;
+}
+
+/* Keyboard layout similar to Wordle */
+.keyboard {
+    width: 100%;
+    max-width: 600px;
+    margin: 1.5rem auto 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.key {
+    flex: 1 0 0;
+    max-width: 44px;
+    height: 52px;
+    border-radius: 4px;
+    border: none;
+    background: #818384;
+    color: #f9fafb;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.key.wide-key {
+    flex: 1.6 0 0;
+    max-width: 72px;
+    font-size: 0.7rem;
+}
+
+.key:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.key:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.key.correct {
+    background: var(--success-color);
+    color: #ffffff;
+}
+
+.key.present {
+    background: #b59f3b;
+    color: #ffffff;
+}
+
+.key.absent {
+    background: #3a3a3c;
+    color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .game-section {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .game-grid {
+        gap: 0.5rem;
+    }
+
+    .guess-row {
+        gap: 0.5rem;
+    }
+
+    .key {
+        max-width: 40px;
+        height: 48px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-section {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        padding: 1rem 0.25rem 0.75rem;
+    }
+
+    .keyboard {
+        margin-top: auto;
+        margin-bottom: 0;
+        width: 100%;
+        padding: 0 0.25rem 0.25rem;
+    }
+
+    .keyboard-row {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .key {
+        max-width: none;
+        height: 46px;
+        font-size: 0.8rem;
+    }
+}
