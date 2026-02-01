@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './Game.css';
 import './TileInput.css';
 import { MAX_GUESSES, WORD_LENGTH, useGame } from '../context/GameContext';
 import type { TileStatus } from '../context/GameContext';
 
 export const Game = () => {
+  const [showWinOverlay, setShowWinOverlay] = useState(false);
   const {
     allWords,
     solution,
@@ -23,6 +24,14 @@ export const Game = () => {
   useEffect(() => {
     sectionRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (gameState === 'won') {
+      setShowWinOverlay(true);
+    } else {
+      setShowWinOverlay(false);
+    }
+  }, [gameState]);
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const key = e.key;
 
@@ -163,14 +172,6 @@ export const Game = () => {
       <div className="game-footer">
         <button
           type="button"
-          className="btn btn-reset game-submit"
-          onClick={handleSubmitGuess}
-          disabled={!solution || gameState !== 'playing'}
-        >
-          Guess
-        </button>
-        <button
-          type="button"
           className="btn btn-reset game-new"
           onClick={startNewGame}
           disabled={allWords.length === 0}
@@ -178,6 +179,35 @@ export const Game = () => {
           New Game
         </button>
       </div>
+
+      {gameState === 'won' && showWinOverlay && (
+        <div className="game-overlay" role="dialog" aria-modal="true" aria-label="Game won">
+          <div
+            className="game-overlay-backdrop"
+            onClick={() => setShowWinOverlay(false)}
+          />
+          <div className="game-overlay-content">
+            <div className="game-overlay-badge">
+              <div className="game-overlay-badge-inner">
+                <span className="game-overlay-badge-star">★</span>
+              </div>
+            </div>
+            <div className="game-overlay-confetti game-overlay-confetti-1" />
+            <div className="game-overlay-confetti game-overlay-confetti-2" />
+            <div className="game-overlay-confetti game-overlay-confetti-3" />
+            <h2 className="game-overlay-title">Congratulations!</h2>
+            <p className="game-overlay-text">You found the word. Nice work!</p>
+            <button
+              type="button"
+              className="btn btn-reset game-overlay-button"
+              onClick={startNewGame}
+              disabled={allWords.length === 0}
+            >
+              Play again
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

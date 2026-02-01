@@ -1,4 +1,5 @@
 .game-section {
+    position: relative;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 20px;
@@ -71,6 +72,109 @@
 
 .game-new {
     padding-inline: 1.75rem;
+}
+
+.game-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.game-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+}
+
+.game-overlay-content {
+    position: relative;
+    background: #ffefe9;
+    border-radius: 24px;
+    padding: 2.25rem 2.5rem 2.1rem;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    max-width: 320px;
+    overflow: hidden;
+}
+
+.game-overlay-title {
+    margin: 0.75rem 0 0.4rem;
+    font-size: 1.45rem;
+    color: #222222;
+}
+
+.game-overlay-text {
+    margin: 0 0 1.25rem;
+    color: #666666;
+}
+
+.game-overlay-button {
+    padding-inline: 1.9rem;
+    padding-block: 0.6rem;
+    border-radius: 999px;
+    background: #ff7b80;
+    color: #ffffff;
+    font-weight: 600;
+    margin: auto;
+}
+
+.game-overlay-button:hover:not(:disabled) {
+    background: #ff6a71;
+}
+
+.game-overlay-badge {
+    width: 86px;
+    height: 86px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: #ffd79b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-overlay-badge-inner {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #ffb74d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-overlay-badge-star {
+    font-size: 1.6rem;
+    color: #fff7e6;
+}
+
+.game-overlay-confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.game-overlay-confetti-1 {
+    top: 18px;
+    left: 32px;
+    background: #ff7b80;
+}
+
+.game-overlay-confetti-2 {
+    top: 22px;
+    right: 34px;
+    background: #ffd966;
+}
+
+.game-overlay-confetti-3 {
+    bottom: 26px;
+    right: 46px;
+    background: #8ad4ff;
 }
 
 /* Keyboard layout similar to Wordle */
